@@ -1,0 +1,22 @@
+from fastapi import FastAPI, Depends
+
+from apis import router_list
+from common.auth import check_permission
+from common.middleware import handle_exception_middleware
+
+
+def create_app() -> FastAPI:
+    # 添加通用权限处理依赖
+    app = FastAPI(dependencies=[Depends(check_permission)])
+
+    # 为app添加路由
+    for route_info in router_list:
+        app.include_router(
+            prefix=route_info.prefix,
+            router=route_info.router,
+            tags=route_info.tags
+        )
+    
+    # 添加自定义中间件
+    app.middleware('http')(handle_exception_middleware)
+    return app

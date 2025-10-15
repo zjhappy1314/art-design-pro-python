@@ -1,0 +1,10 @@
+[env]
+host = '0.0.0.0'
+port = 8000
+debug = true
+workers = 1
+
+[log]
+level = 'DEBUG'
+format = '[%(levelname)s] - %(asctime)s %(module)s:%(funcName)s:%(lineno)d - %(message)s'
+file = 'log.txt'
