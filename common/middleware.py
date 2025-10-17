@@ -11,7 +11,7 @@ async def handle_exception_middleware(request: Request, call_next):
     ''' 处理异常为统一格式的中间件 '''
     start_tm = time.time_ns()
     client_info = f'{request.client.host}:{request.client.port}' if request.client else 'unknown'
-    logger.info(f'{client_info} - {request.method.upper()} {request.url.path}?{request.query_params} {request.url.scheme.upper()}')
+    logger.info(f'{client_info} - {request.method.upper()} {request.url.path}{"?" if request.query_params else ""}{request.query_params} {request.url.scheme.upper()}')
     try:
         resp: Response = await call_next(request)
     except PermissionException as e:
@@ -36,7 +36,7 @@ async def handle_exception_middleware(request: Request, call_next):
         )
     finally:
         end_tm = time.time_ns()
-    logger.info(f'{client_info} - {request.method.upper()} {request.url.path}?{request.query_params} {request.url.scheme.upper()} status code:{resp.status_code}, processing time:{(end_tm - start_tm) // 1e6:.0f}ms')
+    logger.info(f'{client_info} - {request.method.upper()} {request.url.path}{"?" if request.query_params else ""}{request.query_params} {request.url.scheme.upper()} status code:{resp.status_code}, processing time:{(end_tm - start_tm) // 1e6:.0f}ms')
     return resp
 
 
