@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from apis import router_list
 from db import async_engine, DBBaseModel
 from common.log import logger
-from common.auth import check_permission
+from common.depends import check_permission
 from common.middleware import handle_exception_middleware, handler_validation_exception
 
 

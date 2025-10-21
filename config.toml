@@ -16,3 +16,9 @@ file = 'log.txt'
 # SQLite: "sqlite+aiosqlite:///./test.db"（注意：SQLite 异步需用 aiosqlite）
 url = 'sqlite+aiosqlite:///./test.db'
 echo = true
+
+[auth]
+[auth.jwt]
+secret_key = 'fajsdfaldhaj#7493'
+expire_minute = 720
+algorithm = 'HS256'

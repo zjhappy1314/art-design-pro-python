@@ -33,14 +33,17 @@ class MenuEnum(PermissionEnum):
 
 class InterfaceEnum(PermissionEnum):
     ''' 接口权限枚举 '''
-    USER_GET = PermissionEnumValue(name='用户信息获取', code='/users/get')
-    USER_POST = PermissionEnumValue(name='用户创建获取', code='/users/post')
+    USER_GET = PermissionEnumValue(name='创建用户信息', code='/users/get')
+    USER_POST = PermissionEnumValue(name='创建用户', code='/users/post')
+    USER_PUT = PermissionEnumValue(name='修改用户信息', code='/users/put')
+    USER_DEL = PermissionEnumValue(name='删除用户信息', code='/users/delete')
+    USER_ENABLE = PermissionEnumValue(name='用户启用禁用', code='/users/delete')
 
 
 class ButtionEnum(PermissionEnum):
     ''' 按钮权限枚举 '''
     USER_ADD = PermissionEnumValue(name='用户新增', code='user:add')
     USER_EDIT = PermissionEnumValue(name='用户编辑', code='user:edit')
-
+    USER_DEL = PermissionEnumValue(name='用户删除', code='user:del')
 
 # print(MenuEnum.all())

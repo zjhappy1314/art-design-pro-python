@@ -44,7 +44,8 @@ async def pagination(
     total = result.scalar_one_or_none() or 0
 
     result = await session.execute(
-        select(model).filter(*filter_colums).filter_by(is_delete=False).offset((pagination_query.page - 1) * pagination_query.size).limit(pagination_query.size)
+        select(model).filter(*filter_colums).filter_by(is_delete=False).order_by(*model.get_default_sort())
+        .offset((pagination_query.page - 1) * pagination_query.size).limit(pagination_query.size)
     )
     has_prev = pagination_query.page != 1
     has_next = (pagination_query.page * pagination_query.size) < total

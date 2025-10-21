@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Type
 from uuid import UUID as UUID4, uuid4
 from pydantic import BaseModel, Field, field_validator, ConfigDict
 
+from sqlalchemy.future import select
 from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy import Column, UUID, DateTime, Boolean, Integer, JSON
@@ -41,6 +42,10 @@ class DBBaseModel(Base):
     is_delete = Column(Boolean, default=False, comment='是否删除')
     enable = Column(Boolean, default=True, comment='是否可用')
     meta = Column(JSON, comment='附加信息')
+
+    @classmethod
+    def get_default_sort(cls) -> tuple:
+        return (cls.utime.desc(), cls.ctime.desc(), cls.id.asc())
 
 
 class DBBaseSchema(BaseModel):

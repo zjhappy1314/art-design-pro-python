@@ -1,9 +1,8 @@
-from typing import cast
+import jwt
 from pydantic import BaseModel, Field
+from datetime import datetime, timedelta, timezone
 
-from fastapi import Request
-from fastapi.routing import APIRoute
-
+from common.log import logger
 from common.exception import PermissionException
 from common.permission_enum import MenuEnum, InterfaceEnum, ButtionEnum
 
@@ -20,6 +19,10 @@ class RoutePermission(BaseModel):
     @classmethod
     def get_extra_key(cls) -> str:
         return 'route_permission'
+    
+    def is_require_auth(self) -> bool:
+        ''' 是否需要权限验证，如果三种权限都为空那么就不需要权限认证 '''
+        return any([len(self.menu_list), len(self.interface_list), len(self.buttion_list)])
     
     def check_menu(self, code: str) -> bool:
         ''' 检查菜单权限 '''
@@ -43,18 +46,28 @@ class RoutePermission(BaseModel):
         return code in [item.value.code for item in self.buttion_list]
 
 
-def check_permission(request: Request):
-    ''' 从请求中获取接口定义时附加的参数，判断是否允许访问
-    权限分三种:菜单权限,接口权限和按钮权限
-    '''
-    # 获取当前路由的端点信息（包含定义时的参数）
-    route: APIRoute = cast(APIRoute, request.scope.get('route'))
-    print(route, '=========', route.openapi_extra)
-    if not route or not route.openapi_extra:
-        raise PermissionException('没有权限')
-    
-    route_permission = RoutePermission(**route.openapi_extra.get(RoutePermission.get_extra_key(), {}))
-    print(route_permission.model_dump(), '==============')
 
-    if not route_permission.check_menu('user-manage'):
-        raise PermissionException('灭有权限')
+def generate_token(data: dict, secret_key: str, expire_minutes: int, algorithm: str) -> str:
+    ''' 生成jwt令牌 '''
+    expire_datetime = datetime.now(timezone.utc) + timedelta(minutes=expire_minutes)
+    encode_dict = {'exp': expire_datetime, **data}
+    # 这里使用默认算法
+    encode_jwt = jwt.encode(encode_dict, secret_key, algorithm)
+    return encode_jwt
+
+
+def parse_token(jwt_token: str, secret_key: str, algorithm: str) -> dict:
+    ''' 解析令牌，如果token不正确会抛出权限异常 '''
+    try:
+        decode_dict = jwt.decode(jwt_token, secret_key, algorithms=[algorithm])
+        now_timestamp = datetime.now(timezone.utc).timestamp()
+        if 'exp' not in decode_dict:
+            raise PermissionException('异常的令牌')
+        
+        if decode_dict['exp'] < now_timestamp:
+            raise PermissionException('失效的令牌')
+        decode_dict.pop('exp')
+        return decode_dict
+    except Exception as e:
+        logger.exception(e)
+        raise PermissionException('非法的令牌')

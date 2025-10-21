@@ -1,5 +1,6 @@
 from passlib.context import CryptContext
-from sqlalchemy import Column, String, Enum
+from sqlalchemy import Column, String, Enum, Integer, ForeignKey
+from sqlalchemy.orm import relationship
 
 from db import DBBaseModel
 from .enums import GenderEnum
@@ -17,6 +18,10 @@ class UserModel(DBBaseModel):
     avatar = Column(String(255), comment='头像地址')
     address = Column(String(255), comment='地址')
     introduce = Column(String(512), comment='个人介绍')
+
+    ############## 关联关系 ##############
+    rid = Column(Integer, ForeignKey('role.id'), comment='角色ID')
+    role = relationship('RoleModel', back_populates='users', lazy='selectin')
 
     pwd_context = CryptContext(
         schemes=["bcrypt"],  # 使用 bcrypt 算法
